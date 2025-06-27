@@ -1,172 +1,235 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Seating Map - No Header</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px;
-    }
+    <meta charset="UTF-8">
+    <title>Seating Map - No Header</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
 
-    .grid {
-      display: grid;
-      gap: 4px;
-      margin-top: 10px;
-      overflow-x: auto;
-    }
+        .grid {
+            display: grid;
+            gap: 4px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
 
-    .rectangle {
-      width: 44px;
-      height: 30px;
-      border: 1px solid #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 10px;
-      box-sizing: border-box;
-      text-align: center;
-    }
+        .rectangle {
+            width: 44px;
+            height: 30px;
+            border: 1px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            box-sizing: border-box;
+            text-align: center;
+            cursor: pointer;
+        }
 
-    .available { background-color: white; }
-    .checked-in { background-color: green; color: white; }
-    .absent { background-color: red; color: white; }
-    .vip { background-color: orange; color: white; }
-    .na { border: none; background: none; cursor: default; color: white}
+            .rectangle:hover {
+                outline: 2px solid blue;
+            }
 
+        .available {
+            background-color: white;
+        }
 
+        .checked-in {
+            background-color: green;
+            color: white;
+        }
 
-    .blank { border: none; background: none; cursor: default; }
+        .absent {
+            background-color: red;
+            color: white;
+        }
 
-    .legend {
-      display: flex;
-      gap: 16px;
-      margin-top: 10px;
-      align-items: center;
-      font-size: 12px;
-    }
+        .vip {
+            background-color: orange;
+            color: white;
+        }
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+        .na {
+            border: none;
+            background: none;
+            cursor: default;
+            color: white
+        }
 
-    .legend-box {
-      width: 14px;
-      height: 14px;
-      border: 1px solid #333;
-    }
+        .blank {
+            border: none;
+            background: none;
+            cursor: default;
+        }
 
-    .legend-box.available { background-color: white; }
-    .legend-box.checked-in { background-color: green; }
-    .legend-box.absent { background-color: red; }
-    .legend-box.vip { background-color: orange; }
-    .legend-box.na { background-color: black; }
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            align-items: center;
+            font-size: 12px;
+        }
 
-  </style>
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #333;
+        }
+
+            .legend-box.available {
+                background-color: white;
+            }
+
+            .legend-box.checked-in {
+                background-color: green;
+            }
+
+            .legend-box.absent {
+                background-color: red;
+            }
+
+            .legend-box.vip {
+                background-color: orange;
+            }
+
+            .legend-box.na {
+                background-color: black;
+            }
+
+        #infoBox {
+            margin-top: 12px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 400px;
+        }
+    </style>
 </head>
 <body>
-<img src="header.jpg" alt="Header Image" style="width: 100%; max-width: 800px; height: auto; margin-bottom: 10px;">
 
-<div id="seatingMap" class="grid"></div>
+    <img src="header.jpg" alt="Header Image" style="width: 100%; max-width: 800px; height: auto; margin-bottom: 10px;">
 
-<div class="legend">
-    <div class="legend-item"><div class="legend-box vip"></div> Đại biểu Khách mời</div>
-    <div class="legend-item"><div class="legend-box available"></div> Chưa có mặt</div>
-    <div class="legend-item"><div class="legend-box checked-in"></div> Đã có mặt</div>
-    <div class="legend-item"><div class="legend-box absent"></div> Vắng (có phép)</div>
+    <div id="seatingMap" class="grid"></div>
 
-</div>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-box vip"></div> Đại biểu Khách mời</div>
+        <div class="legend-item"><div class="legend-box available"></div> Chưa có mặt</div>
+        <div class="legend-item"><div class="legend-box checked-in"></div> Đã có mặt</div>
+        <div class="legend-item"><div class="legend-box absent"></div> Vắng (có phép)</div>
+    </div>
 
-<script>
-  const sheetId = '1Xq_iq3F9j_vjGIKXDdSUZP656QN3kSvMeD5iWZ-TQqw';
-  const sheetName = 'Sheet1';
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}`;
+    <div id="infoBox">Nhấp vào ghế để xem thông tin chi tiết.</div>
 
-  const nRows = 19;
-  const nCols = 13; // 6 left + 1 blank + 6 right
-  const blankCol = 7;
+    <script>
+        const sheetId = '1Xq_iq3F9j_vjGIKXDdSUZP656QN3kSvMeD5iWZ-TQqw';
+        const sheetName = 'Sheet1';
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}`;
 
-  function getRowLetter(index) {
-    return String.fromCharCode(65 + index); // A, B, C, ...
-  }
+        const nRows = 19;
+        const nCols = 13; // 6 left + 1 blank + 6 right
+        const blankCol = 7;
 
-  function getSeatNumber(col) {
-    const realCol = col < blankCol ? col : col - 1;
-    return realCol.toString().padStart(2, '0');
-  }
-
-  function loadData() {
-    fetch(url)
-      .then(res => res.text())
-      .then(text => {
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        const participantMap = {};
-        rows.forEach(row => {
-          const get = (i) => row.c[i] ? row.c[i].v : '';
-          const r = parseInt(get(5));
-          const c = parseInt(get(6));
-          const key = `${r}-${c}`;
-          participantMap[key] = {
-            seatId: get(1),
-            name: get(2),
-            affiliation: get(3),
-            status: (get(4) || 'available').toLowerCase().replace(/\s+/g, '-')
-          };
-        });
-
-        //document.getElementById('rowCount').textContent = `Loaded ${Object.keys(participantMap).length} participants`;
-
-        const grid = document.getElementById('seatingMap');
-        grid.innerHTML = '';
-        grid.style.gridTemplateRows = `repeat(${nRows}, 32px)`;
-        grid.style.gridTemplateColumns = `repeat(${nCols}, 46px)`;
-
-        for (let r = 1; r <= nRows; r++) {
-          for (let c = 1; c <= nCols; c++) {
-            const div = document.createElement('div');
-
-            if (c === blankCol) {
-              div.className = 'rectangle blank';
-              grid.appendChild(div);
-              continue;
-            }
-
-            const rowLetter = getRowLetter(r - 1);
-            const seatNumber = getSeatNumber(c);
-
-            const key = `${r}-${c}`;
-            const p = participantMap[key];
-            const seatId = participantMap[key].seatId;//rowLetter + seatNumber;
-
-            if (p) {
-              div.className = `rectangle ${p.status}`;
-              div.title = `${p.name}\n${seatId} - ${p.affiliation}`;
-              div.textContent = seatId;
-            } else {
-              div.className = 'rectangle available';
-              div.textContent = seatId;
-            }
-
-            grid.appendChild(div);
-          }
+        function getRowLetter(index) {
+            return String.fromCharCode(65 + index); // A, B, C, ...
         }
-      })
-      .catch(err => {
-        console.error('Failed to load sheet:', err);
-        document.getElementById('rowCount').textContent = 'Failed to load data. ' + err;
-      });
-  }
 
-  loadData();
-  setInterval(loadData, 5000); // Refresh every 5 seconds
-</script>
+        function getSeatNumber(col) {
+            const realCol = col < blankCol ? col : col - 1;
+            return realCol.toString().padStart(2, '0');
+        }
+
+        function loadData() {
+            fetch(url)
+                .then(res => res.text())
+                .then(text => {
+                    const json = JSON.parse(text.substr(47).slice(0, -2));
+                    const rows = json.table.rows;
+
+                    const participantMap = {};
+                    rows.forEach(row => {
+                        const get = (i) => row.c[i] ? row.c[i].v : '';
+                        const r = parseInt(get(5));
+                        const c = parseInt(get(6));
+                        const key = `${r}-${c}`;
+                        participantMap[key] = {
+                            seatId: get(1),
+                            name: get(2),
+                            affiliation: get(3),
+                            status: (get(4) || 'available').toLowerCase().replace(/\s+/g, '-')
+                        };
+                    });
+
+                    const grid = document.getElementById('seatingMap');
+                    grid.innerHTML = '';
+                    grid.style.gridTemplateRows = `repeat(${nRows}, 32px)`;
+                    grid.style.gridTemplateColumns = `repeat(${nCols}, 46px)`;
+
+                    for (let r = 1; r <= nRows; r++) {
+                        for (let c = 1; c <= nCols; c++) {
+                            const div = document.createElement('div');
+
+                            if (c === blankCol) {
+                                div.className = 'rectangle blank';
+                                grid.appendChild(div);
+                                continue;
+                            }
+
+                            const rowLetter = getRowLetter(r - 1);
+                            const seatNumber = getSeatNumber(c);
+                            const key = `${r}-${c}`;
+                            const p = participantMap[key];
+                            const seatId = p?.seatId ?? rowLetter + seatNumber;
+
+                            if (p) {
+                                div.className = `rectangle ${p.status}`;
+                                div.title = `${p.name}\n${seatId} - ${p.affiliation}`;
+                                div.textContent = seatId;
+                            } else {
+                                div.className = 'rectangle available';
+                                div.textContent = rowLetter + seatNumber;
+                            }
+
+                            // Add click handler to show info
+                            div.onclick = () => {
+                                const infoBox = document.getElementById('infoBox');
+                                if (p) {
+                                    infoBox.innerHTML = `
+                      <strong>Họ tên:</strong> ${p.name}<br>
+                      <strong>Số ghế:</strong> ${seatId}<br>
+                      <strong>Đơn vị:</strong> ${p.affiliation}<br>
+                      <strong>Trạng thái:</strong> ${p.status}
+                    `;
+                                } else {
+                                    infoBox.innerHTML = `Ghế <strong>${rowLetter + seatNumber}</strong> chưa có người đăng ký.`;
+                                }
+                            };
+
+                            grid.appendChild(div);
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load sheet:', err);
+                    document.getElementById('infoBox').textContent = 'Lỗi khi tải dữ liệu. ' + err;
+                });
+        }
+
+        loadData();
+        setInterval(loadData, 5000); // Refresh every 5 seconds
+    </script>
 
 </body>
 </html>
